@@ -1,0 +1,119 @@
+<!doctype html>
+<html>
+<head>
+    <title>REST Connection Server</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="files/jquery.min.js"></script>
+    <script src="files/ace.js"></script>
+    <script src="files/mode-sql.js"></script>
+    <script src="files/server.js"></script>
+</head>
+<body>
+
+<!-- Editor -->
+<div id="editor"></div>
+
+
+<script>
+    editor = window.ace.edit("editor");
+    div_editor = document.getElementById("editor");
+
+    showEditor = function() {
+        div_editor.style.display = 'block';
+        editor.focus();
+        is_editor = true;
+    }
+
+    FindLines = function(editor) {
+        text = "";
+        row = editor.selection.getCursor().row;
+        if (editor.session.getLine(row).length>0) {
+            // Calc min and max
+            var lmin = row;
+            while (lmin>0 && editor.session.getLine(lmin-1).length>0) lmin--;
+            var lmax = row;
+            while (lmax+1<editor.session.getLength() && editor.session.getLine(lmax+1).length>0) lmax++;
+            // show command
+            text = "";
+            for (var i=lmin;i<=lmax;i++) {
+                text += editor.session.getLine(i)+"\n";
+            }
+            editor.gotoLine(lmax+1);
+            editor.navigateLineEnd();
+        }
+        return text;
+    }
+
+    FindSelected = function(editor) {
+        range = editor.getSelectionRange();
+        text = editor.session.getTextRange(range);
+        if (text.length>0) {
+            line = range.end.row;
+            editor.clearSelection();
+            editor.gotoLine(line+1);
+            editor.navigateLineEnd();
+        }
+        return text;
+    }
+
+
+    ExecuteAtCursor = function(editor) {
+        selected_text = FindSelected(editor);
+        if (selected_text.length>0) {
+            execute_command(selected_text);
+            return;
+        } 
+        lined_text = FindLines(editor);
+        if (lined_text.length>0) {
+            execute_command(lined_text);
+            return;
+        } 
+        alert("Nothing to execute.");
+     }
+
+
+    
+
+
+    editor.setOptions({
+       autoScrollEditorIntoView: true,
+       showPrintMargin: false, // hides the vertical limiting strip
+       maxLines: Infinity, // inicijalno, mijenja se sa calcEditorSize()
+       fontSize: "120%" // ensures that the editor fits in the environment
+    });
+    // ensures proper autocomplete, validation and highlighting of sql code
+    editor.getSession().setMode("ace/mode/sql");
+    // Ctrl+Enter event
+    editor.commands.addCommand({
+        name: 'CtrlEnter',
+        bindKey: {win: 'Ctrl-Enter',  mac: 'Command-Enter'},
+        exec: function(editor) {
+            ExecuteAtCursor(editor);
+        },
+        readOnly: true // false if this command should not apply in readOnly mode
+    });
+
+    calcEditorSize = function() {
+        editor.setOptions({
+            maxLines: Math.floor((window.innerHeight) / editor.renderer.lineHeight)
+        });        
+    }
+    window.onresize = calcEditorSize;
+    
+
+    editor.setValue("");
+    editor.insert("-- REST Connection Server\n");
+    editor.insert("-- Use Ctrl+Enter to execute SQL at cursor position or selected code\n");
+    editor.insert("-- Execute command .help for help\n\n");
+    editor.gotoLine(editor.session.getLength());
+
+    showEditor();
+    calcEditorSize();
+
+</script>
+
+
+    </body>
+</html>
+
