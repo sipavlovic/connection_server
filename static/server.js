@@ -123,7 +123,7 @@ api_delete_conn_token = function(token) {
 
 
 
-// ---------------------
+// ----------------------
 
 
 execute_command = function(text) {
