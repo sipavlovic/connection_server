@@ -4,6 +4,7 @@ import traceback
 
 
 app = Flask(__name__)
+app.config['JSON_AS_ASCII'] = False
 
 
 @app.errorhandler(Exception)
@@ -17,29 +18,28 @@ def message(message,code):
 
 @app.route("/",methods=["GET","POST"])
 def root():
+    "HTML client"
     if request.method=="GET":
         return app.send_static_file('index.html')
     elif request.method=="POST":
-        return jsonify({"json":request.get_json(force=True)})
-
-
-@app.route('/files/<path:path>')
-def static_file(path):
-    return app.send_static_file(path)
+        j = request.get_json(force=True)
+        q = request.args
+        return jsonify({"json":j,"query":q})
 
 
 @app.route("/api",methods=["GET"])
 def api_list():
+    "List API endpoints"
     apilist = []
     for rule in app.url_map.iter_rules():
-        if str(rule)[:4]=='/api':
-            url = str(rule)
-            apilist.append({"url":url,"methods":list(rule.methods)})
+        url = str(rule)
+        apilist.append({"url":url,"methods":list(rule.methods),"desc":app.view_functions[rule.endpoint].__doc__})
     return jsonify({"api":apilist})
 
 
 @app.route("/api/conn",methods=["GET","POST"])
 def conn():
+    "Get list of open connections, open new connection"
     if request.method=="GET":
         l = [{"token":token,"desc":db.conndict[token].desc} for token in db.conndict.keys()]
         return jsonify(l)
@@ -48,7 +48,6 @@ def conn():
         connstr = json.get("conn",None);
         if connstr is None:
             connstr = 'scott/oracle@orcl'
-            #return message("conn key not in json data",400)
         desc = json.get("desc","")
         token = db.open_connection(connstr,desc)
         return jsonify({"token":token,"desc":desc}),201
@@ -56,6 +55,7 @@ def conn():
 
 @app.route("/api/conn/<token>",methods=["GET","POST","DELETE"])
 def conn_id(token):
+    "Execute code within connection specified by token, close connection"
     if request.method=="GET":
         if token in db.conndict.keys():
             c = db.conndict[token]
@@ -89,8 +89,8 @@ def conn_id(token):
         return jsonify({"desc":desc,"data":data,"sql":sql,"fetchmax":fetchmax,"invars":invars,"outvars":outvars})
 
 
-#db.open_connection('scott/oracle@orcl','First connection')
-#db.open_connection('scott/oracle@orcl','Second connection')
+db.open_connection('scott/oracle@orcl','First connection')
+db.open_connection('scott/oracle@orcl','Second connection')
 
 
 if __name__=="__main__":

@@ -29,7 +29,7 @@ def get_token():
 
 def open_connection(connstr,desc=''):
     global conndict
-    conn = Connection(connstr)
+    conn = Connection(connstr,encoding="UTF-8")
     token = get_token()    
     conndict[token] = Conn(conn,desc)
     return token
