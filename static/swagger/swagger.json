@@ -1,0 +1,233 @@
+{
+    "swagger":"2.0",
+
+    "info":{
+        "title":"Connection Server API",
+        "description":"Connection Server for Oracle database. Github page at [https://github.com/sipavlovic/connection_server](https://github.com/sipavlovic/connection_server).",
+        "version":"2019-11-07"
+    },
+
+    "paths": {
+        
+        "/api": {
+            "get":{
+                "tags":["API"],
+                "summary":"List API endpoints",
+                "responses": {
+                  "200": {
+                    "description": "Successful operation",
+                    "schema": {"$ref": "#/definitions/model_api_entries_results"}
+                  },
+                  "400": {"description": "Bad request"},
+                  "500": {"description": "Internal server error"},  
+                },
+            },
+        },
+
+        "/api/conn":{
+            "get":{
+                "tags":["Connection"],
+                "summary":"Get list of open connections",
+                "responses": {
+                  "200": {
+                    "description": "Successful operation",
+                    "schema": {"$ref": "#/definitions/model_token_list"}
+                  },
+                  "400": {"description": "Bad request"},
+                  "500": {"description": "Internal server error"},  
+                },
+            },
+            "post":{
+                "tags":["Connection"],
+                "summary":"Open new connection",
+                "parameters": [
+                  {
+                    "in": "body",
+                    "name": "body",
+                    "description": "New connection data",
+                    "required": true,
+                    "schema": {
+                      "$ref": "#/definitions/model_new_conn"
+                    }
+                  }
+                ],
+                "responses": {
+                  "200": {
+                    "description": "Successful operation",
+                    "schema": {"$ref": "#/definitions/model_token"}
+                  },
+                  "400": {"description": "Bad request"},
+                  "500": {"description": "Internal server error"},  
+                },
+            },
+        },
+
+        "/api/conn/{token}":{
+            "parameters": [
+              {
+                "name": "token",
+                "in": "path",
+                "description": "Connection token",
+                "required": true,
+                "type": "string",
+              }
+            ],
+            "get":{
+                "tags":["Connection by token"],
+                "summary":"Get connection description",
+                "responses": {
+                  "200": {
+                    "description": "Successful operation",
+                    "schema": {"$ref": "#/definitions/model_token"}
+                  },
+                  "400": {"description": "Bad request"},
+                  "500": {"description": "Internal server error"},  
+                },
+            },
+            "post":{
+                "tags":["Connection by token"],
+                "summary":"Execute PL/SQL",
+                "parameters": [
+                  {
+                    "in": "body",
+                    "name": "body",
+                    "description": "Command execution data",
+                    "required": true,
+                    "schema": {
+                      "$ref": "#/definitions/model_execute_input"
+                    }
+                  }
+                ],
+                "responses": {
+                  "200": {
+                    "description": "Successful operation",
+                    "schema": {"$ref": "#/definitions/model_execute_output"}
+                  },
+                  "400": {"description": "Bad request"},
+                  "500": {"description": "Internal server error"},  
+                },
+            },
+            "delete":{
+                "tags":["Connection by token"],
+                "summary":"Close connection",
+                "responses": {
+                  "200": {
+                    "description": "Successful operation",
+                    "schema": {"$ref": "#/definitions/model_message"}
+                  },
+                  "400": {"description": "Bad request"},
+                  "500": {"description": "Internal server error"},  
+                },
+            },
+        },
+
+
+    },
+
+
+
+    "definitions":{
+
+        "model_message": {
+            "type":"object",
+            "properties": {
+                "message": {"type":"string", "description":"Message text"},
+            },
+        },
+
+        "model_list_methods": {
+            "type":"array",
+            "items": {
+                "type":"string",
+                "enum":["GET","POST","DELETE","HEAD","OPTIONS"]
+            },
+        },
+
+        "model_api_entry": {
+            "type": "object",
+            "properties": {
+                "desc":     {"type":"string", "description":"Entry description"},
+                "methods":  {"$ref": "#/definitions/model_list_methods"},
+                "url":      {"type":"string", "description":"URL address"}
+            }
+        },
+
+        "model_list_api_entries": {
+            "type":"array",
+            "items": {"$ref": "#/definitions/model_api_entry"}
+        },
+
+        "model_api_entries_results": {
+            "type":"object",
+            "properties": {
+                "api": {"$ref": "#/definitions/model_list_api_entries"}
+            }
+        },
+
+        "model_token": {
+            "type": "object",
+            "properties": {
+                "token":    {"type":"string", "description":"Connection token"},
+                "desc":     {"type":"string", "description":"Connection description"},
+            }
+        },
+
+        "model_token_list": {
+            "type":"array",
+            "items": {"$ref": "#/definitions/model_token"}
+        },
+
+        "model_new_conn": {
+            "type": "object",
+            "properties": {
+                "conn":     {"type":"string", "description":"Connection string"},
+                "desc":     {"type":"string", "description":"Connection description"},
+            }
+        },
+
+
+        "model_column_desc_list": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "name":     {"type":"string", "description":"Column name"},
+                    "type":     {"type":"string", "description":"Column datatype"},            
+                }
+            }
+        },
+
+
+
+
+        "model_execute_input": {
+            "type":"object",
+            "properties": {
+                "sql":      {"type":"string", "description":"SQL command"},
+                "invars":   {"type":"object", "description":"Input variables"},
+                "outvars":  {"type":"object", "description":"Output variables"},
+                "fetchmax": {"type":"integer", "description":"Maximal number of rows to fecth"},
+            }
+        },
+
+        "model_execute_output": {
+            "type":"object",
+            "properties": {
+                "desc":         {"$ref": "#/definitions/model_column_desc_list"},
+                "data":         {"type":"object", "description":"Result data"},
+                "sql":          {"type":"string", "description":"SQL command"},
+                "fetchmax":     {"type":"integer", "description":"Maximal numbers of rows to fetch"},
+                "invars":       {"type":"object", "description":"Input variables"},
+                "outvars":      {"type":"object", "description":"Output variables"},
+            }             
+
+        },
+
+    }
+   
+}
+
+
+
+
+
