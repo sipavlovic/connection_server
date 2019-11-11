@@ -27,6 +27,14 @@ def root():
         return jsonify({"json":j,"query":q})
 
 
+@app.route("/swagger",methods=["GET"])
+def swagger():
+    "Swagger client"
+    return app.send_static_file('swagger.html')
+
+
+
+
 @app.route("/api",methods=["GET"])
 def api_list():
     "List API endpoints"
@@ -78,8 +86,12 @@ def conn_id(token):
             return message("sql key not in json data",400)
         invars = json.get("invars",{})
         outvars = json.get("outvars",{})
+        fetchmax = json.get("fetchmax",500)
         try:
-            fetchmax = int(json.get("fetchmax",500))
+            if fetchmax is None:
+                fetchmax = 500
+            else:
+                fetchmax = int(fetchmax)
         except ValueError:
             return message("invalid fetchmax key format",400)
         if fetchmax<1:
