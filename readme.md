@@ -1,4 +1,4 @@
-Connection Server for Oracle Database
+Connection Server for Oracle database
 =====================================
 
 
@@ -25,6 +25,9 @@ Server is written in Python 3.6 using Flask and cx_Oracle:
 Client web page (handy, but not necessary for usage) is written in javascript, using ACE editor and JQuery:
 * Ace Editor: https://ace.c9.io/
 * JQuery: https://jquery.com/
+
+Swagger REST API user interface is written using Swagger-UI bundle:
+* Swagger-UI: https://swagger.io/tools/swagger-ui/
 
 
 License
