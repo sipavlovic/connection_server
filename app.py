@@ -101,8 +101,8 @@ def conn_id(token):
         return jsonify({"desc":desc,"data":data,"sql":sql,"fetchmax":fetchmax,"invars":invars,"outvars":outvars})
 
 
-db.open_connection('scott/oracle@orcl','First connection')
-db.open_connection('scott/oracle@orcl','Second connection')
+#db.open_connection('scott/oracle@orcl','First connection')
+#db.open_connection('scott/oracle@orcl','Second connection')
 
 
 if __name__=="__main__":
